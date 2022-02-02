@@ -1,0 +1,46 @@
+package okka_lib
+-- version =
+-- authors =
+-- maintainers =
+-- license =
+-- brief =
+-- readme =
+-- homepage =
+-- sourceloc =
+-- bugtracker =
+
+-- packages to add to search path
+depends = contrib -- For parser/lexer
+
+-- modules to install
+modules = Okka.Core.Eval, Okka.Core.Terms, Okka.Core.Terms.Util,
+          Okka.Syntax.Util, Okka.Syntax.Terms.Util, Okka.Syntax.Check, Okka.Syntax.Terms, Okka.Syntax.Parse, Okka.Syntax.Lex,
+	  Util.Error, Util.Fin
+
+-- main file (i.e. file to load at REPL)
+-- main =
+
+-- name of executable
+-- executable =
+-- opts =
+sourcedir = "src"
+-- builddir =
+-- outputdir =
+
+-- script to run before building
+-- prebuild =
+
+-- script to run after building
+-- postbuild =
+
+-- script to run after building, before installing
+-- preinstall =
+
+-- script to run after installing
+-- postinstall =
+
+-- script to run before cleaning
+-- preclean =
+
+-- script to run after cleaning
+-- postclean =

@@ -1,0 +1,10 @@
+def id : (a : Type) -> a -> a =
+    fn a => fn x => x;
+
+
+def const : (a : id Type Type) -> (b : Type) -> a -> b -> a =
+    fn a => fn b => fn x => fn y => x;
+
+
+def constagain : (a : Type) -> (b : Type) -> a -> b -> a =
+    fn a => fn b => fn x => fn y => id a x;
