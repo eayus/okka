@@ -27,7 +27,7 @@ data Token : Type where
 tokens : TokenMap (Maybe Token)
 tokens =
     [
-        (reject (exact "def" <|> exact "fn") <+> alphas, Just . TIdent),
+        (reject (exact "def" <|> exact "fn") <+> alphaNums, Just . TIdent),
         (exact "->", Just . const TThinArrow),
         (exact "=>", Just . const TThickArrow),
         (exact ":", Just . const TColon),

@@ -15,6 +15,7 @@ mutual
     eval env (CLam x) = CNfLam $ MkCClosure env x
     eval env (CPi x y) = CNfNeu $ CNePi (eval env x) (MkCClosure env y)
     eval env CUni = CNfNeu CNeUni
+    eval env CI32 = CNfNeu CNeI32
 
 
     export
@@ -60,13 +61,16 @@ mutual
 
     reifyNf (CNfNeu (CNeVar x)) expr =
         -- Not sure this is correct
-        error "[Exception]: 'reifyNf' case id=3 unexpected."
+        error "[Exception]: 'reifyNf' case id=4 unexpected."
 
     reifyNf (CNfNeu (CNeApp funTy argTy x y)) expr =
         -- Not sure this is correct
-        error "[Exception]: 'reifyNf' case id=2 unexpected."
+        error "[Exception]: 'reifyNf' case id=3 unexpected."
 
     reifyNf (CNfNeu CNeUni) (CNfLam x) =
+        error "[Exception]: 'reifyNf' case id=2 unexpected."
+
+    reifyNf (CNfNeu CNeI32) (CNfLam x) =
         error "[Exception]: 'reifyNf' case id=1 unexpected."
 
     reifyNf (CNfLam x) expr =
@@ -87,6 +91,8 @@ mutual
 
     reifyNe ty CNeUni = CUni
 
+    reifyNe ty CNeI32 = CI32
+
 
 mutual
     export
@@ -101,6 +107,8 @@ mutual
          in nfEqual t t' && nfEqual (runClosure (weakenClos u) var) (runClosure (weakenClos u') var)
 
     neEqual CNeUni CNeUni = True
+
+    neEqual CNeI32 CNeI32 = True
 
     neEqual _ _ = False
 

@@ -13,6 +13,9 @@ mutual
         CPi  : CExpr scope -> CExpr (S scope) -> CExpr scope
         CUni : CExpr scope
 
+        -- TODO: perhaps unify CUni and other prim types under "CPrimTy"
+        CI32 : CExpr scope
+
 
     public export
     data CProgram : Nat -> Type where
@@ -32,6 +35,7 @@ mutual
         CNeApp : (funTy : CNf scope) -> (argTy : CNf scope) -> CNe scope -> CNf scope -> CNe scope
         CNePi  : CNf scope -> CClosure scope -> CNe scope
         CNeUni : CNe scope
+        CNeI32 : CNe scope
 
 
     public export

@@ -19,3 +19,4 @@ mutual
     showNE names (CNeApp funTy argTy x y) = "(App \{showNE names x} \{showNF names y})"
     showNE names (CNePi x y) = "(\{showNF names x} -> ...)"
     showNE names CNeUni = "Type"
+    showNE names CNeI32 = "Int32"

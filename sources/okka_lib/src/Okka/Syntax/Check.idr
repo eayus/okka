@@ -40,9 +40,11 @@ mutual
 
     infer ctx (SVar x) with (x == typeIdent)
       _ | True = Right (CUni, CNfNeu CNeUni)
-      _ | False with (lookupCtx x ctx)
-        _ | Nothing = Left "Undefined variable \{show x}"
-        _ | Just (i, ty) = Right (CVar i, ty)
+      _ | False with (x == MkIdent "Int32")
+        _ | True = Right (CI32, CNfNeu CNeUni)
+        _ | False with (lookupCtx x ctx)
+          _ | Nothing = Left "Undefined variable \{show x}"
+          _ | Just (i, ty) = Right (CVar i, ty)
 
     infer ctx (SApp x y) = do
         (lhs, funTy@(CNfNeu (CNePi t uClos))) <- infer ctx x | _ => Left "Applying non pi type"

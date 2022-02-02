@@ -8,3 +8,11 @@ def const : (a : id Type Type) -> (b : Type) -> a -> b -> a =
 
 def constagain : (a : Type) -> (b : Type) -> a -> b -> a =
     fn a => fn b => fn x => fn y => id a x;
+
+
+def constswitch : (a : Type) -> a -> (b : Type) -> b -> a =
+    fn a => fn x => fn b => fn y => x;
+
+
+def add : Int32 -> Int32 -> Int32 =
+    fn x => fn y => x;
