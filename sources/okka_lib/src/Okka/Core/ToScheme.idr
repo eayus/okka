@@ -28,6 +28,7 @@ toScheme names (CLam x) =
 toScheme names (CPi x y) = show "UNIT"
 toScheme names CUni = show "UNIT"
 toScheme names CI32 = show "UNIT"
+toScheme names (CLit n) = show n
 
 
 export

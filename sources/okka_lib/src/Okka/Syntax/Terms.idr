@@ -15,6 +15,8 @@ data SExpr : Type where
     SLam : Ident -> SExpr -> SExpr
     SPi  : Ident -> SExpr -> SExpr -> SExpr
 
+    SLit : Int -> SExpr
+
 
 public export
 typeIdent : Ident

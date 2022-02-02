@@ -21,6 +21,7 @@ Show SExpr where
     show (SApp x y)      = "(App \{show x} \{show y})"
     show (SLam name x)   = "(Lam \{show name} \{show x})"
     show (SPi  name t u) = "(Pi \{show name} \{show t} \{show u})"
+    show (SLit n)        = show n
 
 
 public export

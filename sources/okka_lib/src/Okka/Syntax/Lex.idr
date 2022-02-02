@@ -13,6 +13,7 @@ import Data.List
 public export
 data Token : Type where
     TIdent : String -> Token
+    TLit : Int -> Token
     TThinArrow : Token
     TThickArrow : Token
     TColon : Token
@@ -27,7 +28,8 @@ data Token : Type where
 tokens : TokenMap (Maybe Token)
 tokens =
     [
-        (reject (exact "def" <|> exact "fn") <+> alphaNums, Just . TIdent),
+        (reject (exact "def" <|> exact "fn") <+> (alpha <+> many alphaNum), Just . TIdent),
+        (digits, Just . TLit . cast),
         (exact "->", Just . const TThinArrow),
         (exact "=>", Just . const TThickArrow),
         (exact ":", Just . const TColon),
@@ -66,3 +68,4 @@ Show Token where
     show TEquals = "Equals"
     show TDef = "Def"
     show TFn = "Fn"
+    show (TLit n) = "Lit \{show n}"

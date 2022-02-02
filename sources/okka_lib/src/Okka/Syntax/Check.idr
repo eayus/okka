@@ -59,6 +59,8 @@ mutual
         u' <- check (MkEntry name (weakenNf $ eval (toEnv ctx) t') (CNfNeu $ CNeVar last) :: weakenContext ctx) u (CNfNeu CNeUni)
         Right (CPi t' u', CNfNeu CNeUni)
 
+    infer ctx (SLit n) = Right (CLit n, CNfNeu CNeI32)
+
 
     check : {scope : Nat} -> (ctx : Context scope scope) -> SExpr -> CNf scope -> Either String (CExpr scope)
 

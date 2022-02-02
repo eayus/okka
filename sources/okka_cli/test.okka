@@ -16,3 +16,11 @@ def constswitch : (a : Type) -> a -> (b : Type) -> b -> a =
 
 def add : Int32 -> Int32 -> Int32 =
     fn x => fn y => x;
+
+
+def Nat : Type =
+    Int32;
+
+
+def n : Int32 =
+    4;

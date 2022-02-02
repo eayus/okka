@@ -16,6 +16,7 @@ mutual
     eval env (CPi x y) = CNfNeu $ CNePi (eval env x) (MkCClosure env y)
     eval env CUni = CNfNeu CNeUni
     eval env CI32 = CNfNeu CNeI32
+    eval env (CLit n) = CNfNeu $ CNeLit n
 
 
     export
@@ -59,6 +60,9 @@ mutual
 
     reifyNf ty (CNfNeu x) = reifyNe ty x
 
+    reifyNf (CNfNeu (CNeLit _)) (CNfLam _) =
+        error "[Exception]: 'reifyNf' case id=5 unexpected."
+
     reifyNf (CNfNeu (CNeVar x)) expr =
         -- Not sure this is correct
         error "[Exception]: 'reifyNf' case id=4 unexpected."
@@ -93,6 +97,8 @@ mutual
 
     reifyNe ty CNeI32 = CI32
 
+    reifyNe ty (CNeLit n) = CLit n
+
 
 mutual
     export
@@ -109,6 +115,8 @@ mutual
     neEqual CNeUni CNeUni = True
 
     neEqual CNeI32 CNeI32 = True
+
+    neEqual (CNeLit n) (CNeLit m) = n == m
 
     neEqual _ _ = False
 

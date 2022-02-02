@@ -15,6 +15,7 @@ mutual
 
         -- TODO: perhaps unify CUni and other prim types under "CPrimTy"
         CI32 : CExpr scope
+        CLit : Int -> CExpr scope
 
 
     public export
@@ -35,7 +36,10 @@ mutual
         CNeApp : (funTy : CNf scope) -> (argTy : CNf scope) -> CNe scope -> CNf scope -> CNe scope
         CNePi  : CNf scope -> CClosure scope -> CNe scope
         CNeUni : CNe scope
+
         CNeI32 : CNe scope
+        CNeLit : Int -> CNe scope
+
 
 
     public export

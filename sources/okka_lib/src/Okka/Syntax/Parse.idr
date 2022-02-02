@@ -45,6 +45,9 @@ fn = terminal "Expected 'fn'" (\case { TFn => Just (); _ => Nothing })
 ident : Grammar state Token True Ident
 ident = terminal "Expected 'identifier'" (\case { TIdent s => Just (MkIdent s); _ => Nothing })
 
+lit : Grammar state Token True Int
+lit = terminal "Expected 'literal'" (\case { TLit n => Just n; _ => Nothing })
+
 
 -- Expressions
 
@@ -77,7 +80,7 @@ mutual
         pure res
 
     atom : Grammar state Token True SExpr
-    atom = (SVar <$> ident) <|> lam <|> pi <|> subexpr
+    atom = (SLit <$> lit) <|> (SVar <$> ident) <|> lam <|> pi <|> subexpr
 
     chunk : Grammar state Token True SExpr
     chunk = foldl1 SApp <$> some atom 

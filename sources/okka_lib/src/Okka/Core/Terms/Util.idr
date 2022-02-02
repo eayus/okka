@@ -20,3 +20,4 @@ mutual
     showNE names (CNePi x y) = "(\{showNF names x} -> ...)"
     showNE names CNeUni = "Type"
     showNE names CNeI32 = "Int32"
+    showNE names (CNeLit n) = show n
