@@ -7,6 +7,7 @@ import Okka.Syntax.Terms.Util
 import Okka.Syntax.Parse
 import Okka.Syntax.Check
 import Okka.Core.Terms
+import Okka.Core.ToScheme
 
 import System
 import System.File.ReadWrite
@@ -30,7 +31,9 @@ compile filepath = do
     let Right coreProg = checkProgram [] prog
         | Left err => putStrLn err >> exitFailure --die err
 
-    putStrLn "Compilation succesful."
+    putStrLn $ progToScheme [] coreProg
+
+    --putStrLn "Compilation succesful."
 
 
 cmd : Command (IO ())

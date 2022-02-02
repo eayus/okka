@@ -13,7 +13,7 @@ package okka_lib
 depends = contrib -- For parser/lexer
 
 -- modules to install
-modules = Okka.Core.Eval, Okka.Core.Terms, Okka.Core.Terms.Util,
+modules = Okka.Core.Eval, Okka.Core.Terms, Okka.Core.Terms.Util, Okka.Core.ToScheme,
           Okka.Syntax.Util, Okka.Syntax.Terms.Util, Okka.Syntax.Check, Okka.Syntax.Terms, Okka.Syntax.Parse, Okka.Syntax.Lex,
 	  Util.Error, Util.Fin
 
