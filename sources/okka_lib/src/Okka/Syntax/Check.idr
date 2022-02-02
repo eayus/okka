@@ -48,20 +48,20 @@ mutual
         (lhs, funTy@(CNfNeu (CNePi t uClos))) <- infer ctx x | _ => Left "Applying non pi type"
         rhs <- check ctx y t
         -- Bit messy how we reify the arg type, only to immediately eval it.
-        Right (CApp (reifyNf (CNfNeu CNeUni) funTy) (reifyNf (CNfNeu CNeUni) t) lhs rhs, runClosure uClos (eval {-makeEnv-} (toEnv ctx) rhs))
+        Right (CApp (reifyNf (CNfNeu CNeUni) funTy) (reifyNf (CNfNeu CNeUni) t) lhs rhs, runClosure uClos (eval (toEnv ctx) rhs))
 
     infer ctx (SLam x y) = Left "Cannot infer type for lambda"
 
     infer ctx (SPi name t u) = do
         t' <- check ctx t (CNfNeu CNeUni)
-        u' <- check ({-(name, weakenNf $ eval makeEnv t')-} MkEntry name (weakenNf $ eval {-makeEnv-}(toEnv ctx) t') (CNfNeu $ CNeVar last) :: weakenContext ctx) u (CNfNeu CNeUni)
+        u' <- check (MkEntry name (weakenNf $ eval (toEnv ctx) t') (CNfNeu $ CNeVar last) :: weakenContext ctx) u (CNfNeu CNeUni)
         Right (CPi t' u', CNfNeu CNeUni)
 
 
     check : {scope : Nat} -> (ctx : Context scope scope) -> SExpr -> CNf scope -> Either String (CExpr scope)
 
     check ctx (SLam name body) (CNfNeu (CNePi t u)) = do
-        body' <- check ({-(name, weakenNf t)-} MkEntry name (weakenNf t) (CNfNeu $ CNeVar last) :: weakenContext ctx) body (runClosure (weakenClos u) (CNfNeu $ CNeVar last))
+        body' <- check (MkEntry name (weakenNf t) (CNfNeu $ CNeVar last) :: weakenContext ctx) body (runClosure (weakenClos u) (CNfNeu $ CNeVar last))
         Right $ CLam body'
 
     check ctx (SLam name body) t = Left "Expected non-function, but expression is a lambda"
@@ -76,7 +76,7 @@ mutual
 checkFunction : {scope : Nat} -> (ctx : Context scope scope) -> SFunction -> Either String (CExpr scope, CNf scope)
 checkFunction ctx func = do
     ty <- check ctx func.type (CNfNeu CNeUni)
-    let ty' = eval {-makeEnv-} (toEnv ctx) ty
+    let ty' = eval (toEnv ctx) ty
     body <- check ctx func.body ty'
     Right (body, ty')
 
@@ -86,5 +86,5 @@ checkProgram : {scope : Nat} -> (ctx : Context scope scope) -> SProgram -> Eithe
 checkProgram ctx [] = Right []
 checkProgram ctx (x :: xs) = do
     (x', ty) <- checkFunction ctx x
-    prog' <- checkProgram ({-(x.name, weakenNf ty)-} MkEntry x.name (weakenNf ty) (weakenNf $ eval {-makeEnv-} (toEnv ctx) x') :: weakenContext ctx) xs
+    prog' <- checkProgram (MkEntry x.name (weakenNf ty) (weakenNf $ eval (toEnv ctx) x') :: weakenContext ctx) xs
     Right (x' :: prog')

@@ -88,12 +88,6 @@ mutual
     reifyNe ty CNeUni = CUni
 
 
-export
-makeEnv : {scope : Nat} -> CEnv scope scope
-makeEnv {scope = Z} = []
-makeEnv {scope = S n} = CNfNeu (CNeVar FZ) :: weakenEnv makeEnv
-
-
 mutual
     export
     neEqual : {scope : Nat} -> (x, y : CNe scope) -> Bool
