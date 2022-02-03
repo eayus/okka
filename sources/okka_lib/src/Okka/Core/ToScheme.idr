@@ -26,15 +26,15 @@ toScheme names (CLam x) =
     in "(lambda \{name} \{body})"
 
 toScheme names (CPi x y) = show "UNIT"
-toScheme names CUni = show "UNIT"
-toScheme names CI32 = show "UNIT"
-toScheme names (CLit n) = show n
+toScheme names (CPT _)   = show "UNIT"
+toScheme names (CLit n)  = show n
 
 
 export
 progToScheme : Vect scope String -> CProgram scope -> String
 progToScheme names [] = ""
-progToScheme names (x :: xs) =
+progToScheme names (Nothing :: xs) = progToScheme (freshName names :: names) xs
+progToScheme names (Just x :: xs) =
     let name = freshName names
         body = toScheme names x
         func = "(define \{name} \{body})"

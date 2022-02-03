@@ -6,6 +6,19 @@ import Data.Vect
 import Util.Fin
 
 
+public export
+Show CPrimTy where
+    show TUni = "Type"
+    show TI32 = "Int32"
+
+
+public export
+Eq CPrimTy where
+    TUni == TUni = True
+    TI32 == TI32 = True
+    _    == _    = False
+
+
 mutual
     public export
     showNF : {scope : Nat} -> Vect scope Ident -> CNf scope -> String
@@ -18,6 +31,5 @@ mutual
       _ | (MkIdent name) = name
     showNE names (CNeApp funTy argTy x y) = "(App \{showNE names x} \{showNF names y})"
     showNE names (CNePi x y) = "(\{showNF names x} -> ...)"
-    showNE names CNeUni = "Type"
-    showNE names CNeI32 = "Int32"
+    showNE names (CNePT x) = show x
     showNE names (CNeLit n) = show n

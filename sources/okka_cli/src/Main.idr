@@ -26,7 +26,7 @@ compile filepath = do
         | Left err => die err
 
     let Right prog = lexParseProgram contents
-        | Left err => die err
+        | Left err => putStrLn err >> exitFailure --die err
 
     let Right coreProg = checkProgram [] prog
         | Left err => putStrLn err >> exitFailure --die err

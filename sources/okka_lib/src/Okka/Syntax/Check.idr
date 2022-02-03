@@ -39,9 +39,9 @@ mutual
     infer : {scope : Nat} -> (ctx : Context scope scope) -> SExpr -> Either String (CExpr scope, CNf scope)
 
     infer ctx (SVar x) with (x == typeIdent)
-      _ | True = Right (CUni, CNfNeu CNeUni)
+      _ | True = Right (CPT TUni, CNfNeu $ CNePT TUni)
       _ | False with (x == MkIdent "Int32")
-        _ | True = Right (CI32, CNfNeu CNeUni)
+        _ | True = Right (CPT TI32, CNfNeu $ CNePT TUni)
         _ | False with (lookupCtx x ctx)
           _ | Nothing = Left "Undefined variable \{show x}"
           _ | Just (i, ty) = Right (CVar i, ty)
@@ -50,16 +50,16 @@ mutual
         (lhs, funTy@(CNfNeu (CNePi t uClos))) <- infer ctx x | _ => Left "Applying non pi type"
         rhs <- check ctx y t
         -- Bit messy how we reify the arg type, only to immediately eval it.
-        Right (CApp (reifyNf (CNfNeu CNeUni) funTy) (reifyNf (CNfNeu CNeUni) t) lhs rhs, runClosure uClos (eval (toEnv ctx) rhs))
+        Right (CApp (reifyNf (CNfNeu $ CNePT TUni) funTy) (reifyNf (CNfNeu $ CNePT TUni) t) lhs rhs, runClosure uClos (eval (toEnv ctx) rhs))
 
     infer ctx (SLam x y) = Left "Cannot infer type for lambda"
 
     infer ctx (SPi name t u) = do
-        t' <- check ctx t (CNfNeu CNeUni)
-        u' <- check (MkEntry name (weakenNf $ eval (toEnv ctx) t') (CNfNeu $ CNeVar last) :: weakenContext ctx) u (CNfNeu CNeUni)
-        Right (CPi t' u', CNfNeu CNeUni)
+        t' <- check ctx t (CNfNeu $ CNePT TUni)
+        u' <- check (MkEntry name (weakenNf $ eval (toEnv ctx) t') (CNfNeu $ CNeVar last) :: weakenContext ctx) u (CNfNeu $ CNePT TUni)
+        Right (CPi t' u', CNfNeu $ CNePT TUni)
 
-    infer ctx (SLit n) = Right (CLit n, CNfNeu CNeI32)
+    infer ctx (SLit n) = Right (CLit n, CNfNeu $ CNePT TI32)
 
 
     check : {scope : Nat} -> (ctx : Context scope scope) -> SExpr -> CNf scope -> Either String (CExpr scope)
@@ -77,12 +77,16 @@ mutual
              True => pure x'
 
 
-checkFunction : {scope : Nat} -> (ctx : Context scope scope) -> SFunction -> Either String (CExpr scope, CNf scope)
+checkFunction : {scope : Nat} -> (ctx : Context scope scope) -> SFunction -> Either String (Maybe (CExpr scope), CNf scope)
 checkFunction ctx func = do
-    ty <- check ctx func.type (CNfNeu CNeUni)
+    ty <- check ctx func.type (CNfNeu $ CNePT TUni)
     let ty' = eval (toEnv ctx) ty
-    body <- check ctx func.body ty'
-    Right (body, ty')
+
+    case func.body of
+         Nothing => Right (Nothing, ty')
+         Just body' => do
+             body <- check ctx body' ty'
+             Right (Just body, ty')
 
 
 export
@@ -90,5 +94,9 @@ checkProgram : {scope : Nat} -> (ctx : Context scope scope) -> SProgram -> Eithe
 checkProgram ctx [] = Right []
 checkProgram ctx (x :: xs) = do
     (x', ty) <- checkFunction ctx x
-    prog' <- checkProgram (MkEntry x.name (weakenNf ty) (weakenNf $ eval (toEnv ctx) x') :: weakenContext ctx) xs
+
+    let entry = case x' of
+                     Just body => MkEntry x.name (weakenNf ty) (weakenNf $ eval (toEnv ctx) body)
+                     Nothing => MkEntry x.name (weakenNf ty) (CNfNeu $ CNeVar last)
+    prog' <- checkProgram (entry :: weakenContext ctx) xs
     Right (x' :: prog')

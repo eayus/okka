@@ -22,13 +22,14 @@ data Token : Type where
     TRParen : Token
     TEquals : Token
     TDef : Token
+    TPostulate : Token
     TFn : Token
 
 
 tokens : TokenMap (Maybe Token)
 tokens =
     [
-        (reject (exact "def" <|> exact "fn") <+> (alpha <+> many alphaNum), Just . TIdent),
+        (reject (exact "def" <|> exact "fn" <|> exact "postulate") <+> (alpha <+> many alphaNum), Just . TIdent),
         (digits, Just . TLit . cast),
         (exact "->", Just . const TThinArrow),
         (exact "=>", Just . const TThickArrow),
@@ -38,6 +39,7 @@ tokens =
         (exact ")", Just . const TRParen),
         (exact "=", Just . const TEquals),
         (exact "def", Just . const TDef),
+        (exact "postulate", Just . const TPostulate),
         (exact "fn", Just . const TFn),
         (spaces, const Nothing)
     ]
@@ -67,5 +69,6 @@ Show Token where
     show TRParen = "RParen"
     show TEquals = "Equals"
     show TDef = "Def"
+    show TPostulate = "Postulate"
     show TFn = "Fn"
     show (TLit n) = "Lit \{show n}"

@@ -28,7 +28,7 @@ record SFunction where
     constructor MkSFunction
     name : Ident
     type : SExpr
-    body : SExpr
+    body : Maybe SExpr
 
 
 public export

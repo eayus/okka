@@ -24,3 +24,18 @@ def Nat : Type =
 
 def n : Int32 =
     4;
+
+
+postulate T : Type;
+postulate A : T;
+postulate B : T;
+
+postulate List : Type -> Type;
+postulate Nil : (a : Type) -> List a;
+postulate Cons : (a : Type) -> a -> List a -> List a;
+
+postulate map : (T -> T) -> List T -> List T;
+
+def xs : List T = Cons T A (Nil T);
+
+def ys : List T = map (id T) xs;

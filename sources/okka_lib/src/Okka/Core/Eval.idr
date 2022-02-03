@@ -3,6 +3,7 @@ module Okka.Core.Eval
 import Data.Fin
 import Data.Vect
 import Okka.Core.Terms
+import Okka.Core.Terms.Util
 import Util.Error
 import Util.Fin
 
@@ -14,8 +15,7 @@ mutual
     eval env (CApp funTy argTy x y) = apply (eval env funTy) (eval env argTy) (eval env x) (eval env y)
     eval env (CLam x) = CNfLam $ MkCClosure env x
     eval env (CPi x y) = CNfNeu $ CNePi (eval env x) (MkCClosure env y)
-    eval env CUni = CNfNeu CNeUni
-    eval env CI32 = CNfNeu CNeI32
+    eval env (CPT x) = CNfNeu $ CNePT x
     eval env (CLit n) = CNfNeu $ CNeLit n
 
 
@@ -52,29 +52,28 @@ mutual
         let arg = CNfNeu $ CNeVar last in
         CLam $ reifyNf (runClosure (weakenClos uClos) arg) (apply (weakenNf ty) (weakenNf t) (weakenNf expr) arg)
 
-    reifyNf (CNfNeu CNeUni) (CNfNeu CNeUni) = CUni
+    reifyNf (CNfNeu (CNePT TUni)) (CNfNeu (CNePT x)) = CPT x
 
-    reifyNf (CNfNeu CNeUni) (CNfNeu (CNePi t uClos)) =
-        CPi (reifyNf (CNfNeu CNeUni) t) (reifyNf (CNfNeu CNeUni)
+    reifyNf (CNfNeu (CNePT TUni)) (CNfNeu (CNePi t uClos)) =
+        CPi (reifyNf (CNfNeu $ CNePT TUni) t) (reifyNf (CNfNeu $ CNePT TUni)
             (runClosure (weakenClos uClos) (CNfNeu $ CNeVar last)))
 
     reifyNf ty (CNfNeu x) = reifyNe ty x
 
     reifyNf (CNfNeu (CNeLit _)) (CNfLam _) =
-        error "[Exception]: 'reifyNf' case id=5 unexpected."
-
-    reifyNf (CNfNeu (CNeVar x)) expr =
-        -- Not sure this is correct
         error "[Exception]: 'reifyNf' case id=4 unexpected."
 
-    reifyNf (CNfNeu (CNeApp funTy argTy x y)) expr =
+    -- These may not be correct, since when we have abstract types.
+    reifyNf (CNfNeu (CNeVar x)) expr =
         -- Not sure this is correct
         error "[Exception]: 'reifyNf' case id=3 unexpected."
 
-    reifyNf (CNfNeu CNeUni) (CNfLam x) =
+    reifyNf (CNfNeu (CNeApp funTy argTy x y)) expr =
+        -- Not sure this is correct
         error "[Exception]: 'reifyNf' case id=2 unexpected."
 
-    reifyNf (CNfNeu CNeI32) (CNfLam x) =
+    -- Lambdas always will have a Pi type, which is already covered.
+    reifyNf _ (CNfLam x) =
         error "[Exception]: 'reifyNf' case id=1 unexpected."
 
     reifyNf (CNfLam x) expr =
@@ -87,15 +86,13 @@ mutual
     reifyNe ty (CNeVar x) = CVar $ complement x
 
     reifyNe ty (CNeApp funTy argTy x y) =
-        let funTy' = reifyNf (CNfNeu CNeUni) funTy
-            argTy' = reifyNf (CNfNeu CNeUni) argTy
+        let funTy' = reifyNf (CNfNeu $ CNePT TUni) funTy
+            argTy' = reifyNf (CNfNeu $ CNePT TUni) argTy
         in CApp funTy' argTy' (reifyNe funTy x) (reifyNf argTy y)
 
-    reifyNe ty (CNePi x y) = CPi (reifyNf (CNfNeu CNeUni) x) (reifyNf (CNfNeu CNeUni) (runClosure (weakenClos y) (CNfNeu $ CNeVar last)))
+    reifyNe ty (CNePi x y) = CPi (reifyNf (CNfNeu $ CNePT TUni) x) (reifyNf (CNfNeu $ CNePT TUni) (runClosure (weakenClos y) (CNfNeu $ CNeVar last)))
 
-    reifyNe ty CNeUni = CUni
-
-    reifyNe ty CNeI32 = CI32
+    reifyNe ty (CNePT x) = CPT x
 
     reifyNe ty (CNeLit n) = CLit n
 
@@ -112,9 +109,7 @@ mutual
          let var = CNfNeu $ CNeVar last
          in nfEqual t t' && nfEqual (runClosure (weakenClos u) var) (runClosure (weakenClos u') var)
 
-    neEqual CNeUni CNeUni = True
-
-    neEqual CNeI32 CNeI32 = True
+    neEqual (CNePT x) (CNePT y) = x == y
 
     neEqual (CNeLit n) (CNeLit m) = n == m
 

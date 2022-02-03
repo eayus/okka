@@ -39,6 +39,9 @@ equals = terminal "Expected '='" (\case { TEquals => Just (); _ => Nothing })
 def : Grammar state Token True ()
 def = terminal "Expected 'def'" (\case { TDef => Just (); _ => Nothing })
 
+postulate : Grammar state Token True ()
+postulate = terminal "Expected 'postulate'" (\case { TPostulate => Just (); _ => Nothing })
+
 fn : Grammar state Token True ()
 fn = terminal "Expected 'fn'" (\case { TFn => Just (); _ => Nothing })
 
@@ -101,12 +104,22 @@ function = do
     equals
     body <- expr
     semiColon
-    pure $ MkSFunction { name = name, type = type, body = body }
+    pure $ MkSFunction { name = name, type = type, body = Just body }
+
+
+postu : Grammar state Token True SFunction
+postu = do
+    postulate
+    name <- ident
+    colon
+    type <- expr
+    semiColon
+    pure $ MkSFunction { name = name, type = type, body = Nothing }
 
 
 program : Grammar state Token True SProgram
 program = do
-    x <- function
+    x <- function <|> postu
     xs <- program <|> pure []
     pure $ x :: xs
 

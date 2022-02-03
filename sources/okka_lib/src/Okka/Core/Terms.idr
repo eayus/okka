@@ -4,6 +4,12 @@ import Data.Fin
 import Data.Vect
 
 
+public export
+data CPrimTy : Type where
+    TUni : CPrimTy
+    TI32 : CPrimTy
+
+
 mutual
     public export
     data CExpr : (scope : Nat) -> Type where
@@ -11,17 +17,16 @@ mutual
         CApp : (funTy : CExpr scope) -> (argTy : CExpr scope) -> CExpr scope -> CExpr scope -> CExpr scope
         CLam : CExpr (S scope) -> CExpr scope
         CPi  : CExpr scope -> CExpr (S scope) -> CExpr scope
-        CUni : CExpr scope
+        CPT  : CPrimTy -> CExpr scope
 
-        -- TODO: perhaps unify CUni and other prim types under "CPrimTy"
-        CI32 : CExpr scope
         CLit : Int -> CExpr scope
+        --CSuc : CExpr scope
 
 
     public export
     data CProgram : Nat -> Type where
         Nil : CProgram scope
-        (::) : CExpr scope -> CProgram (S scope) -> CProgram scope
+        (::) : Maybe (CExpr scope) -> CProgram (S scope) -> CProgram scope
 
 
     public export
@@ -29,15 +34,16 @@ mutual
         CNfNeu : CNe scope -> CNf scope
         CNfLam : CClosure scope -> CNf scope
 
+        --CNfSuc : 
+
 
     public export
     data CNe : (scope : Nat) -> Type where
         CNeVar : Fin scope -> CNe scope
         CNeApp : (funTy : CNf scope) -> (argTy : CNf scope) -> CNe scope -> CNf scope -> CNe scope
         CNePi  : CNf scope -> CClosure scope -> CNe scope
-        CNeUni : CNe scope
+        CNePT  : CPrimTy -> CNe scope
 
-        CNeI32 : CNe scope
         CNeLit : Int -> CNe scope
 
 
