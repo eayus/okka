@@ -1,0 +1,5 @@
+postulate Vect : Int32 -> Type;
+
+def f : Vect 3 -> Type = fn vec => Type;
+
+def g : Vect (add 1 2) -> Type = f;

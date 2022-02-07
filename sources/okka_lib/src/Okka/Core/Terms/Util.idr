@@ -24,6 +24,7 @@ mutual
     showNF : {scope : Nat} -> Vect scope Ident -> CNf scope -> String
     showNF names (CNfNeu x) = showNE names x
     showNF names (CNfLam x) = "(Lam ...)"
+    showNF names (CNfPrim f)  = "(PrimFunc ...)"
 
     public export
     showNE : {scope : Nat} -> Vect scope Ident -> CNe scope -> String
@@ -33,3 +34,4 @@ mutual
     showNE names (CNePi x y) = "(\{showNF names x} -> ...)"
     showNE names (CNePT x) = show x
     showNE names (CNeLit n) = show n
+    showNE names CNeAdd  = "Add"

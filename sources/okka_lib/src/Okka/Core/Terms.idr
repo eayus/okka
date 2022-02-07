@@ -2,6 +2,7 @@ module Okka.Core.Terms
 
 import Data.Fin
 import Data.Vect
+import Data.Nat
 
 
 public export
@@ -20,7 +21,7 @@ mutual
         CPT  : CPrimTy -> CExpr scope
 
         CLit : Int -> CExpr scope
-        --CSuc : CExpr scope
+        CAdd : CExpr scope
 
 
     public export
@@ -34,7 +35,7 @@ mutual
         CNfNeu : CNe scope -> CNf scope
         CNfLam : CClosure scope -> CNf scope
 
-        --CNfSuc : 
+        CNfPrim : CPrimClosure scope -> CNf scope
 
 
     public export
@@ -45,6 +46,7 @@ mutual
         CNePT  : CPrimTy -> CNe scope
 
         CNeLit : Int -> CNe scope
+        CNeAdd : CNe scope
 
 
 
@@ -58,3 +60,13 @@ mutual
         constructor MkCClosure
         env : CEnv scope scope'
         body : CExpr (S scope')
+
+
+    public export
+    record CPrimClosure (scope : Nat) where
+        constructor MkCPrimClosure
+        arity : Nat
+        argc  : Nat
+        runPrim : (Vect arity (CNf scope) -> CNf scope)
+        args : Vect argc (CNf scope)
+        -- 0 part : argc `LT` arity

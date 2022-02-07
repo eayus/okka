@@ -42,9 +42,11 @@ mutual
       _ | True = Right (CPT TUni, CNfNeu $ CNePT TUni)
       _ | False with (x == MkIdent "Int32")
         _ | True = Right (CPT TI32, CNfNeu $ CNePT TUni)
-        _ | False with (lookupCtx x ctx)
-          _ | Nothing = Left "Undefined variable \{show x}"
-          _ | Just (i, ty) = Right (CVar i, ty)
+        _ | False with (x == MkIdent "add")
+          _ | True = Right (CAdd, addTy)
+          _ | False with (lookupCtx x ctx)
+            _ | Nothing = Left "Undefined variable \{show x}"
+            _ | Just (i, ty) = Right (CVar i, ty)
 
     infer ctx (SApp x y) = do
         (lhs, funTy@(CNfNeu (CNePi t uClos))) <- infer ctx x | _ => Left "Applying non pi type"

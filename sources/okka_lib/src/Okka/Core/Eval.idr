@@ -6,6 +6,24 @@ import Okka.Core.Terms
 import Okka.Core.Terms.Util
 import Util.Error
 import Util.Fin
+import Data.Nat
+import Decidable.Equality
+
+
+intToInt : CNf scope
+intToInt = CNfNeu $ CNePi (CNfNeu $ CNePT TI32) (MkCClosure [] $ CPT TI32)
+
+export
+addTy : CNf scope
+addTy = CNfNeu $ CNePi (CNfNeu $ CNePT TI32) $ MkCClosure [] $ CPi (CPT TI32) (CPT TI32)
+
+addOp : Vect 2 (CNf scope) -> CNf scope
+addOp [CNfNeu (CNeLit n), CNfNeu (CNeLit m)] = CNfNeu (CNeLit (m + n))
+addOp x with (x)
+  _ | [l, r] = CNfNeu (CNeApp intToInt (CNfNeu $ CNePT TI32) (CNeApp addTy (CNfNeu $ CNePT TI32) CNeAdd l) r)
+
+-- CAREFUL! When defining a primitive op, the args are in reverse order. They are pushed on like a stack. So
+-- addOp [x, y] would come from "y + x" in code.
 
 
 mutual
@@ -17,18 +35,26 @@ mutual
     eval env (CPi x y) = CNfNeu $ CNePi (eval env x) (MkCClosure env y)
     eval env (CPT x) = CNfNeu $ CNePT x
     eval env (CLit n) = CNfNeu $ CNeLit n
+    eval env CAdd = CNfPrim $ MkCPrimClosure 2 0 addOp [] --(LTESucc LTEZero)
 
 
     export
     apply : CNf scope -> CNf scope -> CNf scope -> CNf scope -> CNf scope
     apply funTy argTy (CNfNeu x) y = CNfNeu (CNeApp funTy argTy x y)
     apply funTy argTy (CNfLam clos) arg = runClosure clos arg
+    apply funTy argTy (CNfPrim f) arg = runPrimClosure f arg
 
 
     export
     runClosure : CClosure scope -> (arg : CNf scope) -> CNf scope
     runClosure clos arg = eval (arg :: clos.env) clos.body
 
+
+    export
+    runPrimClosure : CPrimClosure scope -> (arg : CNf scope) -> CNf scope
+    runPrimClosure (MkCPrimClosure arity argc runPrim args) arg with (decEq (S argc) arity)
+      runPrimClosure (MkCPrimClosure (S argc) argc runPrim args) arg | Yes Refl = runPrim (arg :: args)
+      runPrimClosure (MkCPrimClosure arity argc runPrim args) arg | No neq = CNfPrim $ MkCPrimClosure arity (S argc) runPrim (arg :: args)
 
 
 export
@@ -38,6 +64,10 @@ weakenNf = believe_me
 export
 weakenClos : CClosure scope -> CClosure (S scope)
 weakenClos = believe_me
+
+export
+weakenPrimClos : CPrimClosure scope -> CPrimClosure (S scope)
+weakenPrimClos = believe_me
 
 export
 weakenEnv : Vect len (CNf scope) -> Vect len (CNf (S scope))
@@ -59,6 +89,10 @@ mutual
             (runClosure (weakenClos uClos) (CNfNeu $ CNeVar last)))
 
     reifyNf ty (CNfNeu x) = reifyNe ty x
+
+    -- I belive that NfPrim will always have a Pi type, which is already covered.
+    reifyNf _ (CNfPrim f) =
+        error "[Exception]: 'reifyNf' case id=5 unexpected."
 
     reifyNf (CNfNeu (CNeLit _)) (CNfLam _) =
         error "[Exception]: 'reifyNf' case id=4 unexpected."
@@ -96,6 +130,8 @@ mutual
 
     reifyNe ty (CNeLit n) = CLit n
 
+    reifyNe ty CNeAdd = CAdd
+
 
 mutual
     export
@@ -113,6 +149,8 @@ mutual
 
     neEqual (CNeLit n) (CNeLit m) = n == m
 
+    neEqual CNeAdd CNeAdd = True
+
     neEqual _ _ = False
 
     
@@ -120,4 +158,5 @@ mutual
     nfEqual : {scope : Nat} -> (x, y : CNf scope) -> Bool
     nfEqual (CNfNeu x) (CNfNeu y) = neEqual x y
     nfEqual (CNfLam x) (CNfLam y) = let var = CNfNeu $ CNeVar last in nfEqual (runClosure (weakenClos x) var) (runClosure (weakenClos y) var)
+    nfEqual (CNfPrim x) (CNfPrim y) = let var = CNfNeu $ CNeVar last in nfEqual (runPrimClosure (weakenPrimClos x) var) (runPrimClosure (weakenPrimClos y) var)
     nfEqual _          _          = False

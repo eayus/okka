@@ -28,6 +28,7 @@ toScheme names (CLam x) =
 toScheme names (CPi x y) = show "UNIT"
 toScheme names (CPT _)   = show "UNIT"
 toScheme names (CLit n)  = show n
+toScheme names CAdd = "+"
 
 
 export
