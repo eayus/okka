@@ -79,7 +79,7 @@ mutual
              True => pure x'
 
 
-checkFunction : {scope : Nat} -> (ctx : Context scope scope) -> SFunction -> Either String (Maybe (CExpr scope), CNf scope)
+checkFunction : {scope : Nat} -> (ctx : Context scope scope) -> SFunction -> Either String (Maybe (CExpr (S scope)), CNf scope)
 checkFunction ctx func = do
     ty <- check ctx func.type (CNfNeu $ CNePT TUni)
     let ty' = eval (toEnv ctx) ty
@@ -87,7 +87,7 @@ checkFunction ctx func = do
     case func.body of
          Nothing => Right (Nothing, ty')
          Just body' => do
-             body <- check ctx body' ty'
+             body <- check (MkEntry func.name (weakenNf ty') (CNfNeu $ CNeVar last) :: weakenContext ctx) body' (weakenNf ty')
              Right (Just body, ty')
 
 
@@ -98,7 +98,7 @@ checkProgram ctx (x :: xs) = do
     (x', ty) <- checkFunction ctx x
 
     let entry = case x' of
-                     Just body => MkEntry x.name (weakenNf ty) (weakenNf $ eval (toEnv ctx) body)
+                     Just body => MkEntry x.name (weakenNf ty) (eval (CNfNeu (CNeVar last) :: weakenEnv (toEnv ctx)) body)
                      Nothing => MkEntry x.name (weakenNf ty) (CNfNeu $ CNeVar last)
     prog' <- checkProgram (entry :: weakenContext ctx) xs
     Right (x' :: prog')

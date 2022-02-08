@@ -27,7 +27,7 @@ mutual
     public export
     data CProgram : Nat -> Type where
         Nil : CProgram scope
-        (::) : Maybe (CExpr scope) -> CProgram (S scope) -> CProgram scope
+        (::) : Maybe (CExpr (S scope)) -> CProgram (S scope) -> CProgram scope
 
 
     public export

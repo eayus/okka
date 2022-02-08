@@ -37,7 +37,7 @@ progToScheme names [] = ""
 progToScheme names (Nothing :: xs) = progToScheme (freshName names :: names) xs
 progToScheme names (Just x :: xs) =
     let name = freshName names
-        body = toScheme names x
+        body = toScheme (name :: names) x
         func = "(define \{name} \{body})"
         rest = progToScheme (name :: names) xs
     in "\{func}\n\n\{rest}"
