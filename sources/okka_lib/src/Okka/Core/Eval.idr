@@ -17,6 +17,10 @@ export
 addTy : CNf scope
 addTy = CNfNeu $ CNePi (CNfNeu $ CNePT TI32) $ MkCClosure [] $ CPi (CPT TI32) (CPT TI32)
 
+export
+int3 : CNf scope
+int3 = CNfNeu $ CNePi (CNfNeu $ CNePT TI32) $ MkCClosure [] $ CPi (CPT TI32) (CPi (CPT TI32) (CPT TI32))
+
 addOp : Vect 2 (CNf scope) -> CNf scope
 addOp [CNfNeu (CNeLit n), CNfNeu (CNeLit m)] = CNfNeu (CNeLit (m + n))
 addOp x with (x)
@@ -24,6 +28,16 @@ addOp x with (x)
 
 -- CAREFUL! When defining a primitive op, the args are in reverse order. They are pushed on like a stack. So
 -- addOp [x, y] would come from "y + x" in code.
+
+subOp : Vect 2 (CNf scope) -> CNf scope
+subOp [CNfNeu (CNeLit n), CNfNeu (CNeLit m)] = CNfNeu (CNeLit (m - n))
+subOp x with (x)
+  _ | [l, r] = CNfNeu (CNeApp intToInt (CNfNeu $ CNePT TI32) (CNeApp addTy (CNfNeu $ CNePT TI32) CNeSub l) r)
+
+
+if0Op : Vect 3 (CNf scope) -> CNf scope
+if0Op [f, t, CNfNeu (CNeLit n)] = if n == 0 then t else f
+if0Op [f, t, b] = CNfNeu $ CNeApp intToInt (CNfNeu $ CNePT TI32) (CNeApp addTy (CNfNeu $ CNePT TI32) (CNeApp int3 (CNfNeu $ CNePT TI32) CNeIf0 b) t) f
 
 
 mutual
@@ -36,6 +50,8 @@ mutual
     eval env (CPT x) = CNfNeu $ CNePT x
     eval env (CLit n) = CNfNeu $ CNeLit n
     eval env CAdd = CNfPrim $ MkCPrimClosure 2 0 addOp [] --(LTESucc LTEZero)
+    eval env CSub = CNfPrim $ MkCPrimClosure 2 0 subOp []
+    eval env CIf0 = CNfPrim $ MkCPrimClosure 3 0 if0Op []
 
 
     export
@@ -90,6 +106,7 @@ mutual
 
     reifyNf ty (CNfNeu x) = reifyNe ty x
 
+
     -- I belive that NfPrim will always have a Pi type, which is already covered.
     reifyNf _ (CNfPrim f) =
         error "[Exception]: 'reifyNf' case id=5 unexpected."
@@ -131,6 +148,8 @@ mutual
     reifyNe ty (CNeLit n) = CLit n
 
     reifyNe ty CNeAdd = CAdd
+    reifyNe ty CNeSub = CSub
+    reifyNe ty CNeIf0 = CIf0
 
 
 mutual
@@ -150,6 +169,8 @@ mutual
     neEqual (CNeLit n) (CNeLit m) = n == m
 
     neEqual CNeAdd CNeAdd = True
+    neEqual CNeSub CNeSub = True
+    neEqual CNeIf0 CNeIf0 = True
 
     neEqual _ _ = False
 

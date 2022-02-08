@@ -19,9 +19,11 @@ mutual
         CLam : CExpr (S scope) -> CExpr scope
         CPi  : CExpr scope -> CExpr (S scope) -> CExpr scope
         CPT  : CPrimTy -> CExpr scope
-
         CLit : Int -> CExpr scope
+
         CAdd : CExpr scope
+        CSub : CExpr scope
+        CIf0 : CExpr scope
 
 
     public export
@@ -44,9 +46,11 @@ mutual
         CNeApp : (funTy : CNf scope) -> (argTy : CNf scope) -> CNe scope -> CNf scope -> CNe scope
         CNePi  : CNf scope -> CClosure scope -> CNe scope
         CNePT  : CPrimTy -> CNe scope
-
         CNeLit : Int -> CNe scope
+
         CNeAdd : CNe scope
+        CNeSub : CNe scope
+        CNeIf0 : CNe scope
 
 
 

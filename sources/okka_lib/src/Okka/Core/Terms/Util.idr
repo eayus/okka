@@ -30,8 +30,10 @@ mutual
     showNE : {scope : Nat} -> Vect scope Ident -> CNe scope -> String
     showNE names (CNeVar x) with (index (complement x) names)
       _ | (MkIdent name) = name
-    showNE names (CNeApp funTy argTy x y) = "(App \{showNE names x} \{showNF names y})"
+    showNE names (CNeApp funTy argTy x y) = "(\{showNE names x} \{showNF names y})"
     showNE names (CNePi x y) = "(\{showNF names x} -> ...)"
     showNE names (CNePT x) = show x
     showNE names (CNeLit n) = show n
     showNE names CNeAdd  = "Add"
+    showNE names CNeSub  = "Sub"
+    showNE names CNeIf0  = "If0"

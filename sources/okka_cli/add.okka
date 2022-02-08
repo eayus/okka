@@ -1,5 +1,7 @@
 postulate Vect : Int32 -> Type;
 
-def f : Vect 3 -> Type = fn vec => Type;
+postulate N : Int32;
 
-def g : Vect (add 1 2) -> Type = f;
+def f : Vect N -> Type = fn vec => Type;
+
+def g : Vect (add 0 N) -> Type = f;

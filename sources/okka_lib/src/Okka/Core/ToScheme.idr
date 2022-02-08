@@ -29,6 +29,8 @@ toScheme names (CPi x y) = show "UNIT"
 toScheme names (CPT _)   = show "UNIT"
 toScheme names (CLit n)  = show n
 toScheme names CAdd = "+"
+toScheme names CSub = "-"
+toScheme names CIf0 = "if0"
 
 
 export

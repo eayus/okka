@@ -1,0 +1,17 @@
+def Nat : Type = Int32;
+
+def Z : Nat = 0;
+
+def S : Nat -> Nat = add 1;
+
+
+def addnat : Nat -> Nat -> Nat
+    = fn x => fn y => ifz x y (S (addnat (sub x 1) y));
+
+
+
+postulate Vect : Nat -> Type;
+
+def v : Vect 3 -> Type = fn vec => Type;
+
+def w : Vect (addnat 1 2) -> Type = v;
